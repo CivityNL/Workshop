@@ -30,5 +30,12 @@ class Ckan:
         )
 
         # TODO: in case of an error, CKAN will return te following JSON:
-        # {"help": "https://tst-ckan-dataplatform-nl.dataplatform.nl/api/3/action/help_show?name=datastore_upsert", "success": false, "error": {"__type": "Validation Error", "key": ["fields \"situation_id\" are missing but needed as key"]}}
+        # {
+        #     "help": "https://tst-ckan-dataplatform-nl.dataplatform.nl/api/3/action/help_show?name=datastore_upsert", 
+        #     "success": false, 
+        #     "error": {
+        #         "__type": "Validation Error", 
+        #         "key": ["fields \"situation_id\" are missing but needed as key"]
+        #     }
+        # }
         # Parse this message and throw an error if needed

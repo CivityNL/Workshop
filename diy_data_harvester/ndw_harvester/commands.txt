@@ -1,3 +1,3 @@
 docker build -t ndw_harvester docker
-docker run --rm --name ndw_harvester --volume /c/Users/basvanmeulebrouk/Workspace/Dataplatform/workshop/DataHarvester/ndw_harvester/src:/src --volume /c/Users/basvanmeulebrouk/Workspace/Dataplatform/workshop/DataHarvester/ndw_harvester/data:/data -w /src ndw_harvester python /src/main.py
-docker run --rm --name ndw_harvester -w /src ndw_harvester pip freeze > C:\Users\basvanmeulebrouk\Workspace\Dataplatform\workshop\DataHarvester\ndw_harvester\requirements.txt
+docker run --rm --name ndw_harvester --volume C:\Users\basvanmeulebrouk\Workspace\Dataplatform\Workshop\diy_data_harvester\ndw_harvester\src:/src --volume C:\Users\basvanmeulebrouk\Workspace\Dataplatform\Workshop\diy_data_harvester\ndw_harvester\data:/data -w /src ndw_harvester python /src/main.py
+docker run --rm --name ndw_harvester -w /src ndw_harvester pip freeze > C:\Users\basvanmeulebrouk\Workspace\Dataplatform\workshop\diy_data_harvester\ndw_harvester\requirements.txt
