@@ -1,0 +1,151 @@
+{
+	"info": {
+		"_postman_id": "90bfa593-3287-4884-aa15-3069b3c96102",
+		"name": "Data harvester using CKAN data store API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create resource",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"fields\": [\r\n        {\r\n            \"id\": \"situation_id\",\r\n            \"type\": \"text\"\r\n        },\r\n        {\r\n            \"id\": \"version\",\r\n            \"type\": \"text\"\r\n        },\r\n        {\r\n            \"id\": \"severity\",\r\n            \"type\": \"text\"\r\n        },\r\n        {\r\n            \"id\": \"valid_from\",\r\n            \"type\": \"timestamp\"\r\n        },\r\n        {\r\n            \"id\": \"valid_to\",\r\n            \"type\": \"timestamp\"\r\n        },\r\n        {\r\n            \"id\": \"causes\",\r\n            \"type\": \"text\"\r\n        },\r\n        {\r\n            \"id\": \"geom\",\r\n            \"type\": \"text\"\r\n        }\r\n    ],\r\n    \"force\": \"true\",\r\n    \"primary_key\": [\r\n        \"situation_id\"\r\n    ],\r\n    \"resource\": {\r\n        \"id\": \"gebeurtenisinformatie\",\r\n        \"name\": \"Gebeurtenisinformatie\",\r\n        \"description\": \"Gebeurtenisinformatie van het Nationaal Dataportaal Wegverkeer. \",\r\n        \"license_id\": \"notspecified\",\r\n        \"package_id\": \"gebeurtenisinformatie\",\r\n        \"layer_srid\": \"4326\"\r\n    },\r\n    \"records\": [\r\n        {\r\n            \"situation_id\": \"just_testing_high\",\r\n            \"version\": \"1\",\r\n            \"severity\": \"high\",\r\n            \"valid_from\": \"2021-12-01 00:00:00\",\r\n            \"valid_to\": \"2021-12-31 23:59:59\",\r\n            \"causes\": \"Gaten in de weg repareren, hoge prioriteit\",\r\n            \"geom\": \"POINT(5.0 52.0)\"\r\n        },\r\n        {\r\n            \"situation_id\": \"just_testing_medium\",\r\n            \"version\": \"1\",\r\n            \"severity\": \"medium\",\r\n            \"valid_from\": \"2021-12-01 00:00:00\",\r\n            \"valid_to\": \"2021-12-31 23:59:59\",\r\n            \"causes\": \"Gaten in de weg repareren, medium prioriteit\",\r\n            \"geom\": \"POINT(5.1 52.1)\"\r\n        },\r\n        {\r\n            \"situation_id\": \"just_testing_low\",\r\n            \"version\": \"1\",\r\n            \"severity\": \"low\",\r\n            \"valid_from\": \"2021-12-01 00:00:00\",\r\n            \"valid_to\": \"2021-12-31 23:59:59\",\r\n            \"causes\": \"Gaten in de weg repareren, lage prioriteit.\",\r\n            \"geom\": \"POINT(5.2 52.2)\"\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ckan_url}}/api/3/action/datastore_create",
+					"host": [
+						"{{ckan_url}}"
+					],
+					"path": [
+						"api",
+						"3",
+						"action",
+						"datastore_create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upsert record",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"records\": [\r\n        {\r\n            \"situation_id\": \"just_testing_low\",\r\n            \"version\": \"3\",\r\n            \"severity\": \"low\",\r\n            \"valid_from\": \"2021-11-01 00:00:00\",\r\n            \"valid_to\": \"2021-12-31 23:59:59\",\r\n            \"causes\": \"Gaten in de weg repareren. Maar eigenlijk vallen die best mee. \",\r\n            \"lon\": 5.2,\r\n            \"lat\": 52.2\r\n        }\r\n    ],\r\n    \"force\": \"true\",\r\n    \"method\": \"upsert\",\r\n    \"resource_id\": \"gebeurtenisinformatie\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ckan_url}}/api/3/action/datastore_upsert",
+					"host": [
+						"{{ckan_url}}"
+					],
+					"path": [
+						"api",
+						"3",
+						"action",
+						"datastore_upsert"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Download gebeurtenisinformatie",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://opendata.ndw.nu/gebeurtenisinfo.xml.gz",
+					"protocol": "https",
+					"host": [
+						"opendata",
+						"ndw",
+						"nu"
+					],
+					"path": [
+						"gebeurtenisinfo.xml.gz"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete records",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"resource_id\": \"gebeurtenisinformatie\", \r\n    \"force\": true,\r\n    \"filters\": {\r\n        \"situation_id\": \"just_testing_high\" \r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ckan_url}}/api/3/action/datastore_delete",
+					"host": [
+						"{{ckan_url}}"
+					],
+					"path": [
+						"api",
+						"3",
+						"action",
+						"datastore_delete"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "{{api_key}}",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "Authorization",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
