@@ -1,0 +1,7 @@
+** Status ** Data store: depending on the configuration, GeoServer: depending on configuration.
+** Title ** Duth municipalities.
+** Contents ** This shape file resource contains Dutch municipalities with a lot of attributes and geometries.
+** Laundering ** Column names in this resource should not be modified: both PostgreSQL and GeoServer should be able to use these column names as is.
+** Data store ** Uploading this resource to the CKAN data store should work depending on the configuration: for indexing purposes, data are stored in a tsvector field which can only accommodate for a certain size. If the geometry field is not excluded from indexing, updating the index (and thus pushing to the data store) will fail.
+** GeoServer ** Publishing this resource in GeoServer should work once the resource is properly pushed to the data store.
+** Spatial information ** The shape file can contain information regarding the spatial extent and coordinate reference system. If this information is present in the shape file, it does not have to be added manually in the resource.

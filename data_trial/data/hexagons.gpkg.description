@@ -1,0 +1,7 @@
+** Status ** Data store: OK, GeoServer: OK.
+** Title ** A collection of hexagons.
+** Contents ** This GeoPackage resource contains hexogon polygons.
+** Laundering ** Column names in this resource should not be modified: both PostgreSQL and GeoServer should be able to use these column names as is.
+** Data store ** Uploading this resource to the CKAN data store should work.
+** GeoServer ** Publishing in GeoServer should work as well.
+** Spatial information ** The GeoPackage file can contain information regarding the spatial extent or coordinate reference system. If this information is present in the GeoPackage, it does not have to be added manually in the resource.

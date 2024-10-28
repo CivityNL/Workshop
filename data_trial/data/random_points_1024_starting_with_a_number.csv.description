@@ -1,0 +1,7 @@
+** Status ** Data store: OK, GeoServer: error.
+** Title ** A collection of 1024 random points.
+** Contents ** This CSV resource contains random strings, numbers, date/times and coordinates in longitude/latitude columns.
+** Laundering ** Column names in this resource should be - but are not being - modified: column names cannot start with a number.
+** Data store ** Uploading this resource to the CKAN data store should work.
+** GeoServer ** Column names in PostgreSQL/GeoServer cannot start with a number, therefore publishing in GeoServer should fail.
+** Spatial information ** The CSV file does not contain information regarding the spatial extent or coordinate reference system, so this information must be added manually in the resource.

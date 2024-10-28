@@ -1,0 +1,7 @@
+** Status ** Data store: error, GeoServer: error.
+** Title ** A collection of 1024 random points and a collection of 2048 random points.
+** Contents ** This GeoPackage resource contains random strings, numbers, date/times and geometries.
+** Laundering ** Column names in this resource should not be modified: both PostgreSQL and GeoServer should be able to use these column names as is.
+** Data store ** Uploading this resource to the CKAN data store should fail since the GeoPackage contains multiple layers whereas only GeoPackages with one layer are supported.
+** GeoServer ** Publishing this resource in GeoServer should fail since the resource is not pushed to the data store.
+** Spatial information ** The GeoPackage file can contain information regarding the spatial extent or coordinate reference system. If this information is present in the GeoPackage, it does not have to be added manually in the resource.

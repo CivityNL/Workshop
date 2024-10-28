@@ -1,0 +1,7 @@
+** Status ** Data store: OK, GeoServer: OK.
+** Title ** A collection of 1024 random points.
+** Contents ** This CSV resource contains random strings, numbers, date/times and coordinates in longitude/latitude columns.
+** Laundering ** Column names in this resource should be modified: case is not preserved.
+** Data store ** Uploading this resource to the CKAN data store should work.
+** GeoServer ** The coordinates should be converted to a PostGIS spatial column and publishing in GeoServer should work as well.
+** Spatial information ** The CSV file does not contain information regarding the spatial extent or coordinate reference system, so this information must be added manually in the resource.
