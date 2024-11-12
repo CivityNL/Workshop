@@ -1,4 +1,4 @@
-from arcgis_for_server_harvester.src.domain.Package import Package
+from arcgis_for_server_harvester.src.domain.package import Package
 
 
 class PackageList:

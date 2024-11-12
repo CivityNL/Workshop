@@ -1,12 +1,22 @@
-from arcgis_for_server_harvester.src.arcgis_for_server.arcgis_for_server import ArcGISForServer
-from arcgis_for_server_harvester.src.domain.PackageList import PackageList
+import argparse
+import logging
+from arcgis_for_server_harvester.src.harvester.harvester import Harvester
 
+logging.basicConfig(filename='./arcgis_for_server_metadata_harvester.log', level=logging.INFO)
 
-def do_something():
-    arcgis_for_server: ArcGISForServer = ArcGISForServer('https://sampleserver6.arcgisonline.com/arcgis/rest/services')
-    package_list: PackageList = arcgis_for_server.get_packages()
-    for package in package_list:
-        print(package.get_package_id())
+def do_something(arcgis_for_server_url: str, ckan_url: str, ckan_api_token: str, ckan_organization_id: str):
+    harvester: Harvester = Harvester(arcgis_for_server_url, ckan_url, ckan_api_token, ckan_organization_id)
+
+    harvester.run()
 
 if __name__ == '__main__':
-    do_something()
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('arcgis_for_server_url')
+    parser.add_argument('ckan_url')
+    parser.add_argument('ckan_api_token')
+    parser.add_argument('ckan_organization_id')
+
+    args = parser.parse_args()
+
+    do_something(args.arcgis_for_server_url, args.ckan_url, args.ckan_api_token, args.ckan_organization_id)

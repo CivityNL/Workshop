@@ -1,12 +1,13 @@
 import base64
 
-from cryptography.fernet import Fernet
+import cryptocode
 import requests
 import json
 import logging
 
-from arcgis_for_server_harvester.src.domain.Package import Package
-from arcgis_for_server_harvester.src.domain.PackageList import PackageList
+from arcgis_for_server_harvester.src.ckan.ckan import Ckan
+from arcgis_for_server_harvester.src.domain.package import Package
+from arcgis_for_server_harvester.src.domain.package_list import PackageList
 
 logger = logging.getLogger(__name__)
 
@@ -42,19 +43,15 @@ class ArcGISForServer:
     """
 
     def __init__(self, url: str) -> None:
+        super().__init__()
         self.__url: str = url
-        self.__key = base64.urlsafe_b64encode('snetmychovcifmehoghrowib'.encode())
+        self.__key = 'aitidfob'
 
-    """Get a list of package ID's provided by this ArcGIS for Server instance"""
+    """Get a list of package with just their ID's provided by this ArcGIS for Server instance"""
     def get_packages(self) -> PackageList:
         result: PackageList = PackageList()
 
-        payload = {}
-        headers = {}
-
-        response = requests.request('GET', self.__url + '?f=pjson', headers=headers, data=payload)
-        response_string: str = response.text
-        response_json = json.loads(response_string)
+        response_json = self.get_json(self.__url + '?f=pjson')
 
         """Process services JSON node"""
         services_json_array = response_json['services']
@@ -64,13 +61,36 @@ class ArcGISForServer:
             if service_type == 'MapServer':  # ... or FeatureServer or GPServer if you want to process those as well/instead
                 service_url: str = self.__url + '/' + service_name + '/' + service_type
 
-                package_id = self.encode_package_id(service_url)
+                service_response_json = self.get_json(service_url + '?f=pjson')
 
-                package: Package = Package(package_id)
+                """Create a package from the information from ArcGIS for Server"""
+                package: Package = Package(Ckan.encode(service_url))
+
+                package.add_name_value('access_rights', 'http://publications.europa.eu/resource/authority/access-right/PUBLIC')
+                package.add_name_value('authority', 'http://standaarden.overheid.nl/owms/terms/Leeuwarden_(gemeente)')
+                package.add_name_value('contact_point_email', 'servicedesk@civity.nl')
+                package.add_name_value('contact_point_name', 'Servicedesk')
+                package.add_name_value('dataplatform_link_enabled', 'False')
+                package.add_name_value('geonetwork_link_enabled', 'False')
+                package.add_name_value('geoserver_link_enabled', 'False')
+                package.add_name_value('isopen', 'false')
+                package.add_name_value('language', 'http://publications.europa.eu/resource/authority/language/ENG')
+                package.add_name_value('license_id', 'notspecified')
+                package.add_name_value('metadata_language', 'http://publications.europa.eu/resource/authority/language/ENG')
+                package.add_name_value('name', Ckan.encode(service_url))  # Used as URL as well, must be unique
+                package.add_name_value('notes', f'* Service description: {service_response_json["serviceDescription"]} /n * Description: {service_response_json["description"]}')  # Can be markdown
+                package.add_name_value('privacy_sensitive', 'onbekend')
+                package.add_name_value('private','false')
+                package.add_name_value('publisher', 'http://standaarden.overheid.nl/owms/terms/Leeuwarden_(gemeente)')
+                package.add_name_value('source', Ckan.encode(self.__url))
+                package.add_name_value('tag_string', 'Just testing')  # Comma separated list of tags
+                package.add_name_value('theme', 'http://standaarden.overheid.nl/owms/terms/Bestuur')
+                package.add_name_value('title', service_response_json['mapName'])
+                package.add_name_value('type', 'dataset')
+                package.add_name_value('update_frequency', 'voortdurend geactualiseerd')
+                package.add_name_value('vermelding_type', 'geo_dataset')
 
                 result.add_package(package)
-
-
 
         """Process folders JSON node. Create new ArcGISForServer instances"""
         # folders_json_array = response_json.get('folders')
@@ -79,13 +99,21 @@ class ArcGISForServer:
 
         return result
 
-    def get_package(self, package_id: str) -> Package:
-        result: Package = Package(package_id)
-        url: str = self.decode_package_id(package_id)
+    def get_json(self, url: str):
+        payload = {}
+        headers = {}
 
-    """Somehow turn this mapName into a unique identifier"""
+        response = requests.request('GET', url, headers=headers, data=payload)
+        response_string: str = response.text
+        response_json = json.loads(response_string)
+
+        return response_json
+
+    """Somehow come up with a unique identifier which can be used in URL's. Semantic key, ugly. 
+    Alternative: double bookkeeping. Also not a good idea"""
     def encode_package_id(self, package_id: str) -> str:
-        return package_id.replace('https://', '').replace('/', '-')
+        return cryptocode.encrypt(package_id, self.__key)
 
     def decode_package_id(self, encoded_package_id: str) -> str:
-        return 'https://' + encoded_package_id.replace('-', '/')
+        return cryptocode.decrypt(encoded_package_id, self.__key)
+
