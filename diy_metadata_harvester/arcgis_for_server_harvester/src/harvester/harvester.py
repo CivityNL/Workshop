@@ -20,7 +20,7 @@ class Harvester:
         ckan: Ckan = Ckan(self.__ckan_url, self.__ckan_api_token, self.__ckan_organization_id)
 
         packages_in_source: PackageList = arcgis_for_server.get_packages()
-        packages_in_target: PackageList = ckan.get_packages(self.__arcgis_for_server_url)
+        packages_in_target: PackageList = ckan.get_packages_for_source(self.__arcgis_for_server_url)
 
         create_package_ids = packages_in_source.get_keys() - packages_in_target.get_keys()
         update_package_ids = packages_in_source.get_keys() & packages_in_target.get_keys()

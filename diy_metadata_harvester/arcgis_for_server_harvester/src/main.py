@@ -1,12 +1,18 @@
 import argparse
 import logging
+
+from arcgis_for_server_harvester.src.ckan.ckan import Ckan
+from arcgis_for_server_harvester.src.domain.package_list import PackageList
 from arcgis_for_server_harvester.src.harvester.harvester import Harvester
 
 logging.basicConfig(filename='./arcgis_for_server_metadata_harvester.log', level=logging.INFO)
 
 def do_something(arcgis_for_server_url: str, ckan_url: str, ckan_api_token: str, ckan_organization_id: str):
-    harvester: Harvester = Harvester(arcgis_for_server_url, ckan_url, ckan_api_token, ckan_organization_id)
+    # ckan: Ckan = Ckan(ckan_url, ckan_api_token, ckan_organization_id)
+    # packages: PackageList = ckan.get_packages_for_organization(ckan_organization_id)
+    # ckan.delete_packages(packages)
 
+    harvester: Harvester = Harvester(arcgis_for_server_url, ckan_url, ckan_api_token, ckan_organization_id)
     harvester.run()
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
 import base64
+import hashlib
 import json
 import logging
 import urllib.parse
@@ -19,9 +20,13 @@ class Ckan:
         self.__ckan_organization_id: str = ckan_organization_id
 
     @staticmethod
+    def hash(s: str) -> str:
+        result = str(int.from_bytes(hashlib.sha1(s.encode('utf-8')).digest(), 'big'))
+        return result
+
+    @staticmethod
     def encode(s: str) -> str:
         result = str(base64.b64encode(s.replace('https://', '').encode('utf-8')), 'utf-8')
-        # result = result[2:-1]
         return result
 
     @staticmethod
@@ -38,25 +43,39 @@ class Ckan:
         else:
             logger.info(f'Error creating package [{package.get_package_id()}]: [{json_response["error"]}]')
 
-    def get_packages(self, arcgis_for_server_url: str) -> PackageList:
+    def get_packages_for_source(self, arcgis_for_server_url: str) -> PackageList:
         """
         Get packages for a specific ArcGIS for Server since CKAN may also contain packages for other ArcGIS for
-        Servers. To keep track of the ArcGIS for Server a package belongs, the URL is stored in the source field of the
-        package
+        Servers. To keep track of the ArcGIS for Server a package belongs to, the URL is stored in the source field of
+        the package
         """
-        package_list: PackageList = PackageList()
+        package_search_url: str = self.__ckan_url + self.__action_api_path + f'package_search?fl=id&rows=500&start=0&q=source:({Ckan.hash(arcgis_for_server_url)})'
 
-        package_search_url: str = self.__ckan_url + self.__action_api_path + f'package_search?fl=id&rows=500&start=0&q=source:({Ckan.encode(arcgis_for_server_url)})'
+        package_list = self.get_packages_for_query(package_search_url)
+
+        return package_list
+
+    def get_packages_for_organization(self, organization_id: str) -> PackageList:
+        """
+        Get packages for a specific organization
+        """
+        package_search_url: str = self.__ckan_url + self.__action_api_path + f'package_search?fl=id&rows=500&start=0&q=owner_org:({organization_id})'
+
+        package_list = self.get_packages_for_query(package_search_url)
+
+        return package_list
+
+    def get_packages_for_query(self, package_search_url):
+        package_list: PackageList = PackageList()
         json_response: json = self.get_something(package_search_url)
         if json_response['success']:
-            logger.info(f'Successfully read packages for ArcGIS for Server URL [{arcgis_for_server_url}]')
+            logger.info(f'Successfully read packages for search [{package_search_url}]')
             results_json_array = json_response['result']['results']
             for result in results_json_array:
                 package_id: str = result['id']
                 package_list.add_package(Package(package_id))
         else:
-            logger.info(f'Error reading packages for ArcGIS for Server URL [{arcgis_for_server_url}]')
-
+            logger.info(f'Error reading packages for search [{package_search_url}]')
         return package_list
 
     def update_package(self, package):
@@ -66,6 +85,10 @@ class Ckan:
             logger.info(f'Successfully updated package [{package.get_package_id()}]')
         else:
             logger.info(f'Error updating package [{package.get_package_id()}]')
+
+    def delete_packages(self, package_list: PackageList) -> None:
+        for package in package_list:
+            self.delete_package(package)
 
     def delete_package(self, package):
         package_delete_url: str = self.__ckan_url + self.__action_api_path + 'package_delete'

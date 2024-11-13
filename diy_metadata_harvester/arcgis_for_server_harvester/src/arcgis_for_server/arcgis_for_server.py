@@ -64,7 +64,7 @@ class ArcGISForServer:
                 service_response_json = self.get_json(service_url + '?f=pjson')
 
                 """Create a package from the information from ArcGIS for Server"""
-                package: Package = Package(Ckan.encode(service_url))
+                package: Package = Package(Ckan.hash(service_url))
 
                 package.add_name_value('access_rights', 'http://publications.europa.eu/resource/authority/access-right/PUBLIC')
                 package.add_name_value('authority', 'http://standaarden.overheid.nl/owms/terms/Leeuwarden_(gemeente)')
@@ -77,12 +77,12 @@ class ArcGISForServer:
                 package.add_name_value('language', 'http://publications.europa.eu/resource/authority/language/ENG')
                 package.add_name_value('license_id', 'notspecified')
                 package.add_name_value('metadata_language', 'http://publications.europa.eu/resource/authority/language/ENG')
-                package.add_name_value('name', Ckan.encode(service_url))  # Used as URL as well, must be unique
-                package.add_name_value('notes', f'* Service description: {service_response_json["serviceDescription"]} /n * Description: {service_response_json["description"]}')  # Can be markdown
+                package.add_name_value('name', Ckan.hash(service_url))  # Used as URL as well, must be unique
+                package.add_name_value('notes', f'**Service description** {service_response_json["serviceDescription"]} **Description** {service_response_json["description"]}')  # Can be markdown
                 package.add_name_value('privacy_sensitive', 'onbekend')
                 package.add_name_value('private','false')
                 package.add_name_value('publisher', 'http://standaarden.overheid.nl/owms/terms/Leeuwarden_(gemeente)')
-                package.add_name_value('source', Ckan.encode(self.__url))
+                package.add_name_value('source', Ckan.hash(self.__url))
                 package.add_name_value('tag_string', 'Just testing')  # Comma separated list of tags
                 package.add_name_value('theme', 'http://standaarden.overheid.nl/owms/terms/Bestuur')
                 package.add_name_value('title', service_response_json['mapName'])
