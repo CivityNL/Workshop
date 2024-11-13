@@ -1,4 +1,6 @@
 __pycache__
 /diy_data_harvester/ndw_harvester/src/ckan/__pycache__
 .idea
-/data_trial/data_trial.log
+/data_trial/*.log
+/diy_metadata_harvester/*.log
+.venv
