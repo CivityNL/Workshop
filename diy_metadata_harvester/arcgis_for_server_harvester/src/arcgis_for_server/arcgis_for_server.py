@@ -44,28 +44,29 @@ class ArcGISForServer:
         super().__init__()
         self.__url: str = url
 
-    """Get a list of package with just their ID's provided by this ArcGIS for Server instance"""
     def get_packages(self) -> PackageList:
+        """Get a list of packages provided by this ArcGIS for Server instance. This determines what the actual
+        packages will look like in CKAN. """
         result: PackageList = PackageList()
 
-        result.add_all_packages(self.get_packages_from_folder(self.__url))
+        result.add_all_packages(self._get_packages_from_folder(self.__url))
 
         return result
 
-    def get_packages_from_folder(self, url: str):
+    def _get_packages_from_folder(self, url: str):
         result: PackageList = PackageList()
 
-        response_json = self.get_json(url + '?f=pjson')
+        response_json = self._get_json(url + '?f=pjson')
 
         """Process services JSON node"""
         services_json_array = response_json['services']
         for service in services_json_array:
-            service_name = service['name']
-            service_type = service['type']
+            service_name: str = service['name']
+            service_type: str = service['type']
             if service_type == 'MapServer':  # ... or FeatureServer or GPServer if you want to process those as well/instead
                 service_url: str = self.__url + '/' + service_name + '/' + service_type
 
-                service_response_json = self.get_json(service_url + '?f=pjson')
+                service_response_json = self._get_json(service_url + '?f=pjson')
 
                 """Create a package from the information from ArcGIS for Server"""
                 package: Package = Package(Ckan.hash(service_url))
@@ -86,10 +87,10 @@ class ArcGISForServer:
                 package.add_name_value('privacy_sensitive', 'onbekend')
                 package.add_name_value('private','false')
                 package.add_name_value('publisher', 'http://standaarden.overheid.nl/owms/terms/Leeuwarden_(gemeente)')
-                package.add_name_value('source', Ckan.hash(self.__url))
+                package.add_name_value('source', Ckan.hash(self.__url))  # Used to look-up packages in subsequent harvester runs
                 package.add_name_value('tag_string', 'Just testing')  # Comma separated list of tags
                 package.add_name_value('theme', 'http://standaarden.overheid.nl/owms/terms/Bestuur')
-                package.add_name_value('title', service_name)
+                package.add_name_value('title', service_name.replace('/', ', '))
                 package.add_name_value('type', 'dataset')
                 package.add_name_value('update_frequency', 'voortdurend geactualiseerd')
                 package.add_name_value('vermelding_type', 'geo_dataset')
@@ -102,11 +103,11 @@ class ArcGISForServer:
         """Process folders JSON node"""
         folders_json_array = response_json.get('folders')
         for folder in folders_json_array:
-            result.add_all_packages(self.get_packages_from_folder(url + '/' + folder))
+            result.add_all_packages(self._get_packages_from_folder(url + '/' + folder))
 
         return result
 
-    def get_json(self, url: str):
+    def _get_json(self, url: str):
         payload = {}
         headers = {}
 

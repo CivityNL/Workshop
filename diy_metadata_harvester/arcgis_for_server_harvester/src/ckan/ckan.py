@@ -140,9 +140,9 @@ class Ckan:
         resource_create_url: str = self.__ckan_url + self.__action_api_path + 'resource_create'
         json_response: json = self._post_something(resource_create_url, resource.to_dict(package_id))
         if json_response['success']:
-            logger.info(f'Successfully created package [{resource.get_resource_id()}]')
+            logger.info(f'Successfully created resource [{resource.get_resource_id()}]')
         else:
-            logger.info(f'Error creating package [{resource.get_resource_id()}]')
+            logger.info(f'Error creating resource [{resource.get_resource_id()}]')
 
     def _get_something(self, url: str) -> json:
         logger.info(f'Getting something from CKAN {url}')
