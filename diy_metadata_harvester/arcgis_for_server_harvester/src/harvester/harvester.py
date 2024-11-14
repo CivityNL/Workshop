@@ -3,9 +3,18 @@ from arcgis_for_server_harvester.src.ckan.ckan import Ckan
 from arcgis_for_server_harvester.src.domain.package import Package
 from arcgis_for_server_harvester.src.domain.package_list import PackageList
 
-
 class Harvester:
+    """
+    Harvester class which connects to ArcGIS for Server and determines which packages and resources are available in
+    ArcGIS for Server. It subsequently connects to CKAN to determine which packages are available in CKAN. It then
+    creates three lists: (1) packages which exist in ArcGIS for Server, but not in CKAN. These must be created in CKAN.
+    (2) packages which exist in both ArcGIS for Server and CKAN. These must be updated in CKAN. (3) packages which exist
+    in CKAN but do not exist in ArcGIS for Server. These must be deleted from CKAN. As a final step, these changes are
+    applied in CKAN.
+    """
+
     def __init__(self, arcgis_for_server_url, ckan_url, ckan_api_token, ckan_organization_id: str) -> None:
+        """Create a harvester instance"""
         super().__init__()
         self.__arcgis_for_server_url = arcgis_for_server_url
         self.__ckan_url = ckan_url
@@ -13,6 +22,8 @@ class Harvester:
         self.__ckan_organization_id = ckan_organization_id
 
     def run(self):
+        """Run the harvester"""
+
         """Source: ArcGIS for Server"""
         arcgis_for_server: ArcGISForServer = ArcGISForServer(self.__arcgis_for_server_url)
 

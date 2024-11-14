@@ -1,6 +1,3 @@
-import base64
-
-import cryptocode
 import requests
 import json
 import logging
@@ -8,6 +5,7 @@ import logging
 from arcgis_for_server_harvester.src.ckan.ckan import Ckan
 from arcgis_for_server_harvester.src.domain.package import Package
 from arcgis_for_server_harvester.src.domain.package_list import PackageList
+from arcgis_for_server_harvester.src.domain.resource import Resource
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +33,8 @@ class ArcGISForServer:
     Attributes
     ----------
         __url
-            URL of the ArcGISForServer instance, without the ? and format specifiers   at the end. Example:
-            https://sampleserver6.arcgisonline.com/arcgis/rest/services
+            URL of the ArcGISForServer instance, without the ? and format specifiers at
+            the end. Example: https://sampleserver6.arcgisonline.com/arcgis/rest/services
 
     Methods
     -------
@@ -45,13 +43,19 @@ class ArcGISForServer:
     def __init__(self, url: str) -> None:
         super().__init__()
         self.__url: str = url
-        self.__key = 'aitidfob'
 
     """Get a list of package with just their ID's provided by this ArcGIS for Server instance"""
     def get_packages(self) -> PackageList:
         result: PackageList = PackageList()
 
-        response_json = self.get_json(self.__url + '?f=pjson')
+        result.add_all_packages(self.get_packages_from_folder(self.__url))
+
+        return result
+
+    def get_packages_from_folder(self, url: str):
+        result: PackageList = PackageList()
+
+        response_json = self.get_json(url + '?f=pjson')
 
         """Process services JSON node"""
         services_json_array = response_json['services']
@@ -85,17 +89,20 @@ class ArcGISForServer:
                 package.add_name_value('source', Ckan.hash(self.__url))
                 package.add_name_value('tag_string', 'Just testing')  # Comma separated list of tags
                 package.add_name_value('theme', 'http://standaarden.overheid.nl/owms/terms/Bestuur')
-                package.add_name_value('title', service_response_json['mapName'])
+                package.add_name_value('title', service_name)
                 package.add_name_value('type', 'dataset')
                 package.add_name_value('update_frequency', 'voortdurend geactualiseerd')
                 package.add_name_value('vermelding_type', 'geo_dataset')
 
+                resource: Resource = Resource(Ckan.hash(service_url + '?f=jsapi'), f'Resource for {service_url}', 'ArcGIS for Server JavaScript API', 'JSAPI', service_url + '?f=jsapi')
+                package.add_resource(resource)
+
                 result.add_package(package)
 
-        """Process folders JSON node. Create new ArcGISForServer instances"""
-        # folders_json_array = response_json.get('folders')
-        # for folder in folders_json_array:
-        #     folder_arcgis_for_server: ArcGISForServer = ArcGISForServer(self.__url + '/' + folder)
+        """Process folders JSON node"""
+        folders_json_array = response_json.get('folders')
+        for folder in folders_json_array:
+            result.add_all_packages(self.get_packages_from_folder(url + '/' + folder))
 
         return result
 
@@ -103,17 +110,10 @@ class ArcGISForServer:
         payload = {}
         headers = {}
 
+        logger.info(f'Getting JSON from {url} for ArcGIS for Server {self.__url}')
+
         response = requests.request('GET', url, headers=headers, data=payload)
         response_string: str = response.text
         response_json = json.loads(response_string)
 
         return response_json
-
-    """Somehow come up with a unique identifier which can be used in URL's. Semantic key, ugly. 
-    Alternative: double bookkeeping. Also not a good idea"""
-    def encode_package_id(self, package_id: str) -> str:
-        return cryptocode.encrypt(package_id, self.__key)
-
-    def decode_package_id(self, encoded_package_id: str) -> str:
-        return cryptocode.decrypt(encoded_package_id, self.__key)
-

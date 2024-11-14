@@ -10,6 +10,10 @@ class PackageList:
     def add_package(self, package: Package) -> None:
         self.__packages[package.get_package_id()] = package
 
+    def add_all_packages(self, package_list) -> None:
+        for package in package_list:
+            self.add_package(package)
+
     def get_package_by_index(self, index: int) -> Package:
         key: str = list(self.__packages)[index]
         return self.get_package_by_id(key)

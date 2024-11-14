@@ -2,6 +2,7 @@ import argparse
 import logging
 
 from arcgis_for_server_harvester.src.ckan.ckan import Ckan
+from arcgis_for_server_harvester.src.domain.package import Package
 from arcgis_for_server_harvester.src.domain.package_list import PackageList
 from arcgis_for_server_harvester.src.harvester.harvester import Harvester
 
