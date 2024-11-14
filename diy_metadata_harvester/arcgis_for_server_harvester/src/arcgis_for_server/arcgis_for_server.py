@@ -1,3 +1,5 @@
+import re
+
 import requests
 import json
 import logging
@@ -83,7 +85,7 @@ class ArcGISForServer:
                 package.add_name_value('license_id', 'notspecified')
                 package.add_name_value('metadata_language', 'http://publications.europa.eu/resource/authority/language/ENG')
                 package.add_name_value('name', Ckan.hash(service_url))  # Used as URL as well, must be unique
-                package.add_name_value('notes', f'**Service description** {service_response_json["serviceDescription"]} **Description** {service_response_json["description"]}')  # Can be markdown
+                package.add_name_value('notes', f'###Service description\r\n{service_response_json["serviceDescription"]}\r\n###Description\r\n{service_response_json["description"]}\r\n###Layers\r\n* Layer 1 description\r\n* Layer 2 description')  # Can be markdown
                 package.add_name_value('privacy_sensitive', 'onbekend')
                 package.add_name_value('private','false')
                 package.add_name_value('publisher', 'http://standaarden.overheid.nl/owms/terms/Leeuwarden_(gemeente)')
