@@ -4,3 +4,4 @@ __pycache__
 /data_trial/*.log
 /diy_metadata_harvester/*.log
 .venv
+*.log
