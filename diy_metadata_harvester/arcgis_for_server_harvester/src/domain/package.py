@@ -1,5 +1,6 @@
-from arcgis_for_server_harvester.src.domain.resource import Resource
+from collections import defaultdict
 
+from arcgis_for_server_harvester.src.domain.resource import Resource
 
 class Package:
     def __init__(self, package_id: str|None, package_name: str) -> None:

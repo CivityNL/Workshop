@@ -74,7 +74,9 @@ class Ckan:
     def create_package(self, package: Package) -> None:
         """Create a package"""
         package_create_url: str = self.__ckan_url + self.__action_api_path + 'package_create'
+
         json_response: json = self._post_something(package_create_url, package.to_dict(self.__ckan_organization_id))
+
         if json_response['success']:
             logger.info(f'Successfully created package with name [{package.get_package_name()}]')
             package.set_package_id(json_response['result']['id'])
@@ -106,35 +108,23 @@ class Ckan:
 
     def get_package_by_id(self, package_id: str) -> Package:
         """Get package by ID"""
-        package: Package|None = None
+        package: Package | None = None
 
         package_show_url: str = self.__ckan_url + self.__action_api_path + f'package_show?id=({package_id})'
 
-        json_response: json = self._get_something(package_show_url)
-
-        if json_response['success']:
-            logger.info(f'Successfully read package by ID from [{package_show_url}]')
-            package_id: str = json_response['result']['id']
-            package_name: str = json_response['result']['name']
-            package = Package(package_id, package_name)
-            package.add_name_value('name', json_response['result']['name'])
-        else:
-            logger.info(f'Error reading packages for search [{package_show_url}]')
+        package = self._get_package_for_show(package_show_url)
 
         return package
 
     def get_package_by_name(self, package_name: str) -> Package:
-        """Get package by Name"""
+        """
+        Get package by Name
+        """
         package: Package | None
 
-        package_search_url: str = self.__ckan_url + self.__action_api_path + f'package_search?fl=id,name&rows=500&start=0&q=name:({package_name})'
+        package_show_url: str = self.__ckan_url + self.__action_api_path + f'package_show?id=({package_name})'
 
-        package_list: PackageList = self._get_packages_for_query(package_search_url)
-
-        if package_list.num_packages() == 1:
-            package = package_list.get_package_by_index(0)
-        else:
-            raise CkanException(f'Unexpected number of packages with name {package_name} found in CKAN {self.__ckan_url}: {package_list.num_packages()}')
+        package = self._get_package_for_show(package_show_url)
 
         return package
 
@@ -142,7 +132,6 @@ class Ckan:
         """
         Update package.
         """
-
         package_update_url: str = self.__ckan_url + self.__action_api_path + 'package_update'
 
         json_response: json = self._post_something(package_update_url, package.to_dict(self.__ckan_organization_id))
@@ -192,6 +181,21 @@ class Ckan:
             logger.info(f'Successfully created resource [{resource.get_resource_id()}]')
         else:
             logger.info(f'Error creating resource [{resource.get_resource_id()}]')
+
+    def _get_package_for_show(self, package_show_url):
+        package: Package | None = None
+
+        json_response: json = self._get_something(package_show_url)
+
+        if json_response['success']:
+            logger.info(f'Successfully read package by ID or name from [{package_show_url}]')
+            package_id: str = json_response['result']['id']
+            package_name: str = json_response['result']['name']
+            package = Package(package_id, package_name)
+        else:
+            logger.info(f'Error reading packages for search [{package_show_url}]')
+
+        return package
 
     def _get_packages_for_query(self, package_search_url) -> PackageList:
         package_list: PackageList = PackageList()

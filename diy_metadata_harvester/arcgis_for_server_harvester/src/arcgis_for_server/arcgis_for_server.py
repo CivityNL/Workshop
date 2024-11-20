@@ -1,15 +1,23 @@
 import re
+from collections import defaultdict
 
 import requests
 import json
 import logging
 
 from ckan.ckan import Ckan
+from domain.extent import Extent
 from domain.package import Package
 from domain.package_list import PackageList
 from domain.resource import Resource
 
 logger = logging.getLogger(__name__)
+
+crs_lookup = defaultdict(lambda: 'Onbekend') | {
+    4326: 'WGS84 (4326)',
+    28992: 'RD (28992)',
+    3035: 'ETRS89 (4937)',
+}
 
 
 class ArcGISForServerException(Exception):
@@ -78,6 +86,9 @@ class ArcGISForServer:
                     look up the package ID if needed. """
                     package: Package = Package(None, Ckan.hash(service_url))
 
+                    full_extent: Extent = self._get_extent(service_response_json['fullExtent'])
+                    initial_extent: Extent = self._get_extent(service_response_json['initialExtent'])
+
                     package.add_name_value('access_rights', 'http://publications.europa.eu/resource/authority/access-right/PUBLIC')
                     package.add_name_value('authority', 'http://standaarden.overheid.nl/owms/terms/Leeuwarden_(gemeente)')
                     package.add_name_value('contact_point_email', 'servicedesk@civity.nl')
@@ -85,6 +96,7 @@ class ArcGISForServer:
                     package.add_name_value('dataplatform_link_enabled', 'False')
                     package.add_name_value('donl_link_enabled', 'False')
                     package.add_name_value('geonetwork_link_enabled', 'False')
+                    package.add_name_value('geo_ref_system', crs_lookup[full_extent.get_srs_code()])
                     package.add_name_value('geoserver_link_enabled', 'False')
                     package.add_name_value('isopen', 'false')
                     package.add_name_value('language', 'http://publications.europa.eu/resource/authority/language/ENG')
@@ -101,6 +113,7 @@ class ArcGISForServer:
                     package.add_name_value('type', 'dataset')
                     package.add_name_value('update_frequency', 'voortdurend geactualiseerd')
                     package.add_name_value('vermelding_type', 'geo_dataset')
+                    package.add_name_value('bounding_box', full_extent.to_string())
 
                     viewer_url: str = 'https://www.arcgis.com/apps/mapviewer/index.html?url=' + service_url + '&source=sd'
                     resource: Resource = Resource(Ckan.hash(viewer_url), f'Resource for {service_url}', 'ArcGIS.com MapViewer', 'MapViewer', viewer_url)
@@ -137,6 +150,23 @@ class ArcGISForServer:
                 result += f'\r\n* Name: {layer["name"]}, id: {layer["id"]}'
 
         return result
+
+    def _get_extent(self, extent_node: json) -> Extent:
+        try:
+            x_min: float = extent_node['xmin']
+            y_min: float = extent_node['ymin']
+            x_max: float = extent_node['xmax']
+            y_max: float = extent_node['ymax']
+
+            srs_code: int | None = None
+            if 'spatialReference' in extent_node:
+                if 'wkid' in extent_node['spatialReference']:
+                    srs_code = extent_node['spatialReference']['wkid']
+
+            return Extent(x_min, y_min, x_max, y_max, srs_code)
+        except Exception as e:
+            logger.info(str(extent_node))
+            logger.error(e)
 
     def _get_json(self, url: str):
         payload = {}
