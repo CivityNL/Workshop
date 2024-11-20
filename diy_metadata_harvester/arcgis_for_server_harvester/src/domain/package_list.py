@@ -8,7 +8,7 @@ class PackageList:
         self.__current = 0
 
     def add_package(self, package: Package) -> None:
-        self.__packages[package.get_package_id()] = package
+        self.__packages[package.get_package_name()] = package
 
     def add_all_packages(self, package_list) -> None:
         for package in package_list:
@@ -16,10 +16,10 @@ class PackageList:
 
     def get_package_by_index(self, index: int) -> Package:
         key: str = list(self.__packages)[index]
-        return self.get_package_by_id(key)
+        return self.get_package_by_name(key)
 
-    def get_package_by_id(self, package_id: str) -> Package:
-        return self.__packages[package_id]
+    def get_package_by_name(self, package_name: str) -> Package:
+        return self.__packages[package_name]
 
     def num_packages(self) -> int:
         return len(self.__packages)

@@ -1,8 +1,8 @@
 import argparse
 import logging
 
-# from ckan.ckan import Ckan
-# from domain.package_list import PackageList
+from ckan.ckan import Ckan
+from domain.package_list import PackageList
 from harvester.harvester import Harvester
 
 logging.basicConfig(filename='./arcgis_for_server_metadata_harvester.log', level=logging.INFO)

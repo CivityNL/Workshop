@@ -33,21 +33,24 @@ class Harvester:
         packages_in_source: PackageList = arcgis_for_server.get_packages()
         packages_in_target: PackageList = ckan.get_packages_for_source(self.__arcgis_for_server_url)
 
-        create_package_ids = packages_in_source.get_keys() - packages_in_target.get_keys()
-        update_package_ids = packages_in_source.get_keys() & packages_in_target.get_keys()
-        delete_package_ids = packages_in_target.get_keys() - packages_in_source.get_keys()
+        create_package_names = packages_in_source.get_keys() - packages_in_target.get_keys()
+        update_package_names = packages_in_source.get_keys() & packages_in_target.get_keys()
+        delete_package_names = packages_in_target.get_keys() - packages_in_source.get_keys()
 
         """Create new packages which no not exist in target yet"""
-        for package_id in create_package_ids:
-            package: Package = packages_in_source.get_package_by_id(package_id)
-            ckan.create_package(package)
+        for package_name in create_package_names:
+            package_from_source: Package = packages_in_source.get_package_by_name(package_name)
+            ckan.create_package(package_from_source)
 
-        """Update packages which exist in both source and target"""
-        for package_id in update_package_ids:
-            package: Package = packages_in_source.get_package_by_id(package_id)
-            ckan.update_package(package)
+        """Update packages which exist in both source and target. ArcGIS for Server (source) is not aware of the 
+        package ID from CKAN (target), so the package ID must be transferred from target to source. """
+        for package_name in update_package_names:
+            package_from_source: Package = packages_in_source.get_package_by_name(package_name)
+            package_from_target: Package = packages_in_target.get_package_by_name(package_name)
+            package_from_source.set_package_id(package_from_target.get_package_id())
+            ckan.update_package(package_from_source)
 
         """Delete packages which no longer exist in source"""
-        for package_id in delete_package_ids:
-            package: Package = packages_in_target.get_package_by_id(package_id)
-            ckan.delete_package(package)
+        for package_name in delete_package_names:
+            package_from_target: Package = packages_in_target.get_package_by_name(package_name)
+            ckan.delete_package(package_from_target)
