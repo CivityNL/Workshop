@@ -1,7 +1,7 @@
-from arcgis_for_server_harvester.src.arcgis_for_server.arcgis_for_server import ArcGISForServer
-from arcgis_for_server_harvester.src.ckan.ckan import Ckan
-from arcgis_for_server_harvester.src.domain.package import Package
-from arcgis_for_server_harvester.src.domain.package_list import PackageList
+from arcgis_for_server.arcgis_for_server import ArcGISForServer
+from ckan.ckan import Ckan
+from domain.package import Package
+from domain.package_list import PackageList
 
 class Harvester:
     """

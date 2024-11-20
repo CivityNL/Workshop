@@ -4,10 +4,10 @@ import requests
 import json
 import logging
 
-from arcgis_for_server_harvester.src.ckan.ckan import Ckan
-from arcgis_for_server_harvester.src.domain.package import Package
-from arcgis_for_server_harvester.src.domain.package_list import PackageList
-from arcgis_for_server_harvester.src.domain.resource import Resource
+from ckan.ckan import Ckan
+from domain.package import Package
+from domain.package_list import PackageList
+from domain.resource import Resource
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +65,7 @@ class ArcGISForServer:
         for service in services_json_array:
             service_name: str = service['name']
             service_type: str = service['type']
-            if service_type == 'MapServer':  # ... or FeatureServer or GPServer if you want to process those as well/instead
+            if (service_type == 'FeatureServer') or (service_type == 'MapServer'):  # ... or FeatureServer or GPServer if you want to process those as well/instead
                 service_url: str = self.__url + '/' + service_name + '/' + service_type
 
                 service_response_json = self._get_json(service_url + '?f=pjson')
@@ -97,15 +97,17 @@ class ArcGISForServer:
                 package.add_name_value('update_frequency', 'voortdurend geactualiseerd')
                 package.add_name_value('vermelding_type', 'geo_dataset')
 
-                resource: Resource = Resource(Ckan.hash(service_url + '?f=jsapi'), f'Resource for {service_url}', 'ArcGIS for Server JavaScript API', 'JSAPI', service_url + '?f=jsapi')
+                viewer_url: str = 'https://www.arcgis.com/apps/mapviewer/index.html?url=' + service_url + '&source=sd'
+                resource: Resource = Resource(Ckan.hash(viewer_url), f'Resource for {service_url}', 'ArcGIS.com MapViewer', 'MapViewer', viewer_url)
                 package.add_resource(resource)
 
                 result.add_package(package)
 
         """Process folders JSON node"""
-        folders_json_array = response_json.get('folders')
-        for folder in folders_json_array:
-            result.add_all_packages(self._get_packages_from_folder(url + '/' + folder))
+        if 'folders' in response_json:
+            folders_json_array = response_json.get('folders')
+            for folder in folders_json_array:
+                result.add_all_packages(self._get_packages_from_folder(url + '/' + folder))
 
         return result
 
