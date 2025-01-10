@@ -143,18 +143,25 @@ class DataTrial:
         logger.info('Uploading GeoJSON files...')
         if self.__ckan.package_exists(self.__package_id):
             logger.info(f'Package {self.__package_id} exists. Continue...')
+
             json_files = self.list_files('./data/', '.json')
-            for resource_id in json_files:
-                json_file_name = json_files[resource_id]
-                logger.info(f'Uploading GeoJSON file [{json_file_name}]...')
-                self.upload_geojson_file(
-                    resource_id,
-                    json_file_name,
-                    self.get_title(json_file_name),
-                    self.get_description(json_file_name)
-                )
+            self.do_upload_geojson_files(json_files)
+
+            geojson_files = self.list_files('./data/', '.geojson')
+            self.do_upload_geojson_files(geojson_files)
         else:
             logger.info(f'Package {self.__package_id} does not exist. Cannot continue.')
+
+    def do_upload_geojson_files(self, json_files):
+        for resource_id in json_files:
+            json_file_name = json_files[resource_id]
+            logger.info(f'Uploading GeoJSON file [{json_file_name}]...')
+            self.upload_geojson_file(
+                resource_id,
+                json_file_name,
+                self.get_title(json_file_name),
+                self.get_description(json_file_name)
+            )
 
     def upload_geojson_file(self, resource_id: str, file_name: str, title: str, description: str):
         self.__ckan.delete_resource_if_exists(resource_id)
@@ -168,6 +175,9 @@ class DataTrial:
         }
 
         self.__ckan.create_resource(file_name, payload)
+
+    def delete_packages(self, query: str | None):
+        self.__ckan.delete_packages(query)
 
     def list_files(self, path: str, extension: str):
         result = {}

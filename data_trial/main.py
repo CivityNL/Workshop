@@ -14,9 +14,10 @@ def do_something(ckan_url, ckan_api_token):
     data_trial.upload_xlsx_files()
     data_trial.upload_geojson_files()
     data_trial.upload_shape_zip_files()
+    # data_trial.delete_packages('id:(data-trial)')
+    # data_trial.delete_packages(None)
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 

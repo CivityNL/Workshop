@@ -1,7 +1,0 @@
-** Status ** Data store: ?, GeoServer: ?.
-** Title ** Water lines in the City of Malmö.
-** Contents ** This GeoJSON resource contains water lines in the City of Malmö with geometries and two attributes.
-** Laundering ** Column names in this resource should not be modified: both PostgreSQL and GeoServer should be able to use these column names as is.
-** Data store ** Uploading this resource to the CKAN data store should work.
-** GeoServer ** Publishing this resource in GeoServer should work once the resource is properly pushed to the data store.
-** Spatial information ** The GeoJSON file does not contain information regarding the spatial extent or coordinate reference system, so this information must be added manually in the resource.
